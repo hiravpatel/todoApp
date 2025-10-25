@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DailyDo - Daily To-Do Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        .app-container {
+            max-width: 414px;
+            margin: 0 auto;
+            box-shadow: 0 0 25px rgba(0, 0, 0, 0.1);
+            min-height: 100vh;
+            background-color: white;
+            position: relative;
+        }
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            max-width: 414px;
+        }
+        .task-item {
+            transition: all 0.2s ease;
+        }
+        .task-item:hover {
+            transform: translateY(-2px);
+        }
+        .chart-bar {
+            transition: all 0.3s ease;
+        }
+        .chart-bar:hover {
+            transform: scale(1.05);
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="app-container mx-auto">
+        <!-- Splash Screen -->
+        <div id="splash-screen" class="h-screen flex flex-col justify-center items-center bg-gradient-to-br from-blue-500 to-purple-600 text-white fade-in">
+            <div class="text-center">
+                <i class="fas fa-tasks text-6xl mb-4"></i>
+                <h1 class="text-4xl font-bold mb-2">DailyDo</h1>
+                <p class="text-xl opacity-90">Your Daily Task Tracker</p>
+            </div>
+            <div class="mt-16">
+                <div class="w-12 h-12 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+            </div>
+        </div>
+
+        <!-- Login Screen -->
+        <div id="login-screen" class="h-screen p-6 bg-white hidden">
+            <div class="flex flex-col h-full">
+                <div class="flex-grow flex flex-col justify-center">
+                    <div class="text-center mb-10">
+                        <i class="fas fa-tasks text-5xl text-blue-500 mb-4"></i>
+                        <h1 class="text-3xl font-bold text-gray-800">Welcome Back</h1>
+                        <p class="text-gray-600 mt-2">Sign in to continue tracking your tasks</p>
+                    </div>
+                    
+                    <form class="space-y-4">
+                        <div>
+                            <label class="block text-gray-700 text-sm font-medium mb-1" for="email">Email</label>
+                            <input id="email" type="email" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="your@email.com">
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 text-sm font-medium mb-1" for="password">Password</label>
+                            <input id="password" type="password" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="••••••••">
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center">
+                                <input type="checkbox" id="remember" class="h-4 w-4 text-blue-500 rounded">
+                                <label for="remember" class="ml-2 text-sm text-gray-700">Remember me</label>
+                            </div>
+                            <a href="#" class="text-sm text-blue-500 hover:text-blue-700">Forgot Password?</a>
+                        </div>
+                        <button type="button" class="w-full bg-blue-500 text-white py-3 rounded-lg font-medium hover:bg-blue-600 transition duration-200" onclick="showScreen('home-screen')">
+                            Sign In
+                        </button>
+                    </form>
+                    
+                    <div class="mt-6 text-center">
+                        <p class="text-gray-600">Don't have an account? 
+                            <a href="#" class="text-blue-500 font-medium hover:text-blue-700" onclick="showScreen('signup-screen')">Sign Up</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Signup Screen -->
+        <div id="signup-screen" class="h-screen p-6 bg-white hidden">
+            <div class="flex flex-col h-full">
+                <div class="flex-grow flex flex-col justify-center">
+                    <div class="text-center mb-10">
+                        <i class="fas fa-tasks text-5xl text-blue-500 mb-4"></i>
+                        <h1 class="text-3xl font-bold text-gray-800">Create Account</h1>
+                        <p class="text-gray-600 mt-2">Sign up to start tracking your tasks</p>
+                    </div>
+                    
+                    <form class="space-y-4">
+                        <div>
+                            <label class="block text-gray-700 text-sm font-medium mb-1" for="fullname">Full Name</label>
+                            <input id="fullname" type="text" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="John Doe">
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 text-sm font-medium mb-1" for="signup-email">Email</label>
+                            <input id="signup-email" type="email" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="your@email.com">
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 text-sm font-medium mb-1" for="signup-password">Password</label>
+                            <input id="signup-password" type="password" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="••••••••">
+                        </div>
+                        <div>
+                            <label class="block text-gray-700 text-sm font-medium mb-1" for="confirm-password">Confirm Password</label>
+                            <input id="confirm-password" type="password" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="••••••••">
+                        </div>
+                        <div class="flex items-center">
+                            <input type="checkbox" id="terms" class="h-4 w-4 text-blue-500 rounded">
+                            <label for="terms" class="ml-2 text-sm text-gray-700">I agree to the <a href="#" class="text-blue-500">Terms & Conditions</a></label>
+                        </div>
+                        <button type="button" class="w-full bg-blue-500 text-white py-3 rounded-lg font-medium hover:bg-blue-600 transition duration-200" onclick="showScreen('home-screen')">
+                            Create Account
+                        </button>
+                    </form>
+                    
+                    <div class="mt-6 text-center">
+                        <p class="text-gray-600">Already have an account? 
+                            <a href="#" class="text-blue-500 font-medium hover:text-blue-700" onclick="showScreen('login-screen')">Sign In</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Home Screen -->
+        <div id="home-screen" class="min-h-screen bg-white hidden">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-800">Today's Tasks</h1>
+                        <p class="text-gray-600" id="current-date">Monday, October 25</p>
+                    </div>
+                    <div class="relative">
+                        <button class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-500">
+                            <i class="fas fa-bell"></i>
+                        </button>
+                        <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">3</span>
+                    </div>
+                </div>
+                
+                <div class="bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl p-4 text-white mb-6">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="text-blue-100">Today's Progress</p>
+                            <h2 class="text-2xl font-bold">3/5 Tasks</h2>
+                            <p class="text-blue-100 text-sm mt-1">60% completed</p>
+                        </div>
+                        <div class="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+                            <div class="text-center">
+                                <span class="text-xl font-bold">60%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-3 w-full bg-white bg-opacity-30 rounded-full h-2">
+                        <div class="bg-white h-2 rounded-full" style="width: 60%"></div>
+                    </div>
+                </div>
+                
+                <div class="flex space-x-2 mb-6">
+                    <button class="bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-medium">All</button>
+                    <button class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium">Pending</button>
+                    <button class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium">Completed</button>
+                </div>
+                
+                <div class="space-y-4 mb-20">
+                    <!-- Task Item 1 -->
+                    <div class="task-item bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
+                        <div class="flex items-start">
+                            <button class="w-6 h-6 rounded-full border-2 border-green-500 flex items-center justify-center mr-3 mt-1">
+                                <i class="fas fa-check text-green-500 text-xs"></i>
+                            </button>
+                            <div class="flex-grow">
+                                <h3 class="font-medium text-gray-800">Morning Meditation</h3>
+                                <p class="text-gray-600 text-sm mt-1">10 minutes of mindfulness practice</p>
+                                <div class="flex items-center mt-2">
+                                    <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">Completed</span>
+                                    <span class="text-xs text-gray-500 ml-2"><i class="far fa-clock mr-1"></i>8:00 AM</span>
+                                </div>
+                            </div>
+                            <button class="text-gray-400 hover:text-gray-600">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Task Item 2 -->
+                    <div class="task-item bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
+                        <div class="flex items-start">
+                            <button class="w-6 h-6 rounded-full border-2 border-blue-500 flex items-center justify-center mr-3 mt-1">
+                            </button>
+                            <div class="flex-grow">
+                                <h3 class="font-medium text-gray-800">Project Meeting</h3>
+                                <p class="text-gray-600 text-sm mt-1">Weekly sync with design team</p>
+                                <div class="flex items-center mt-2">
+                                    <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">Pending</span>
+                                    <span class="text-xs text-gray-500 ml-2"><i class="far fa-clock mr-1"></i>10:30 AM</span>
+                                </div>
+                            </div>
+                            <button class="text-gray-400 hover:text-gray-600">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Task Item 3 -->
+                    <div class="task-item bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
+                        <div class="flex items-start">
+                            <button class="w-6 h-6 rounded-full border-2 border-green-500 flex items-center justify-center mr-3 mt-1">
+                                <i class="fas fa-check text-green-500 text-xs"></i>
+                            </button>
+                            <div class="flex-grow">
+                                <h3 class="font-medium text-gray-800">Lunch Break</h3>
+                                <p class="text-gray-600 text-sm mt-1">Healthy meal and short walk</p>
+                                <div class="flex items-center mt-2">
+                                    <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">Completed</span>
+                                    <span class="text-xs text-gray-500 ml-2"><i class="far fa-clock mr-1"></i>1:00 PM</span>
+                                </div>
+                            </div>
+                            <button class="text-gray-400 hover:text-gray-600">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Task Item 4 -->
+                    <div class="task-item bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
+                        <div class="flex items-start">
+                            <button class="w-6 h-6 rounded-full border-2 border-blue-500 flex items-center justify-center mr-3 mt-1">
+                            </button>
+                            <div class="flex-grow">
+                                <h3 class="font-medium text-gray-800">Finish Report</h3>
+                                <p class="text-gray-600 text-sm mt-1">Complete Q3 financial analysis</p>
+                                <div class="flex items-center mt-2">
+                                    <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">Pending</span>
+                                    <span class="text-xs text-gray-500 ml-2"><i class="far fa-clock mr-1"></i>3:00 PM</span>
+                                </div>
+                            </div>
+                            <button class="text-gray-400 hover:text-gray-600">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Task Item 5 -->
+                    <div class="task-item bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
+                        <div class="flex items-start">
+                            <button class="w-6 h-6 rounded-full border-2 border-green-500 flex items-center justify-center mr-3 mt-1">
+                                <i class="fas fa-check text-green-500 text-xs"></i>
+                            </button>
+                            <div class="flex-grow">
+                                <h3 class="font-medium text-gray-800">Gym Session</h3>
+                                <p class="text-gray-600 text-sm mt-1">Strength training - legs day</p>
+                                <div class="flex items-center mt-2">
+                                    <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">Completed</span>
+                                    <span class="text-xs text-gray-500 ml-2"><i class="far fa-clock mr-1"></i>6:00 PM</span>
+                                </div>
+                            </div>
+                            <button class="text-gray-400 hover:text-gray-600">
+                                <i class="fas fa-ellipsis-v"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Add Task FAB -->
+            <button class="fixed bottom-24 right-6 w-14 h-14 bg-blue-500 rounded-full flex items-center justify-center text-white shadow-lg hover:bg-blue-600 transition duration-200" onclick="showScreen('add-task-screen')">
+                <i class="fas fa-plus text-xl"></i>
+            </button>
+        </div>
+
+        <!-- Add Task Screen -->
+        <div id="add-task-screen" class="min-h-screen bg-white hidden">
+            <div class="p-6">
+                <div class="flex items-center mb-6">
+                    <button class="mr-4 text-gray-500" onclick="showScreen('home-screen')">
+                        <i class="fas fa-arrow-left"></i>
+                    </button>
+                    <h1 class="text-2xl font-bold text-gray-800">Add New Task</h1>
+                </div>
+                
+                <form class="space-y-6">
+                    <div>
+                        <label class="block text-gray-700 text-sm font-medium mb-2" for="task-title">Task Title</label>
+                        <input id="task-title" type="text" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="What needs to be done?">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-gray-700 text-sm font-medium mb-2" for="task-description">Description</label>
+                        <textarea id="task-description" rows="3" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Add details about your task..."></textarea>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-gray-700 text-sm font-medium mb-2" for="task-date">Date</label>
+                        <div class="relative">
+                            <input id="task-date" type="text" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" value="Today, October 25" readonly>
+                            <i class="fas fa-calendar absolute right-3 top-3 text-gray-400"></i>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-gray-700 text-sm font-medium mb-2" for="task-time">Time</label>
+                        <div class="relative">
+                            <input id="task-time" type="text" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" value="10:30 AM" readonly>
+                            <i class="fas fa-clock absolute right-3 top-3 text-gray-400"></i>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-gray-700 text-sm font-medium mb-2">Category</label>
+                        <div class="flex space-x-2 overflow-x-auto pb-2">
+                            <button type="button" class="bg-blue-100 text-blue-700 px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap">Work</button>
+                            <button type="button" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap">Personal</button>
+                            <button type="button" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap">Health</button>
+                            <button type="button" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap">Shopping</button>
+                            <button type="button" class="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap">Other</button>
+                        </div>
+                    </div>
+                    
+                    <div class="pt-4">
+                        <button type="button" class="w-full bg-blue-500 text-white py-3 rounded-lg font-medium hover:bg-blue-600 transition duration-200" onclick="showScreen('home-screen')">
+                            Add Task
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Analytics Screen -->
+        <div id="analytics-screen" class="min-h-screen bg-white hidden">
+            <div class="p-6">
+                <div class="flex items-center mb-6">
+                    <h1 class="text-2xl font-bold text-gray-800 flex-grow">Analytics</h1>
+                    <button class="text-gray-500">
+                        <i class="fas fa-ellipsis-v"></i>
+                    </button>
+                </div>
+                
+                <div class="bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl p-5 text-white mb-6">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <p class="text-blue-100">October 2023</p>
+                            <h2 class="text-2xl font-bold mt-1">Task Completion</h2>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-3xl font-bold">78%</p>
+                            <p class="text-blue-100 text-sm">Completion Rate</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm mb-6">
+                    <h3 class="font-medium text-gray-800 mb-4">Weekly Progress</h3>
+                    <div class="flex justify-between items-end h-32">
+                        <div class="flex flex-col items-center">
+                            <div class="chart-bar bg-blue-500 w-8 rounded-t-lg mb-1" style="height: 60%"></div>
+                            <span class="text-xs text-gray-600">Mon</span>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <div class="chart-bar bg-blue-500 w-8 rounded-t-lg mb-1" style="height: 80%"></div>
+                            <span class="text-xs text-gray-600">Tue</span>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <div class="chart-bar bg-blue-500 w-8 rounded-t-lg mb-1" style="height: 45%"></div>
+                            <span class="text-xs text-gray-600">Wed</span>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <div class="chart-bar bg-blue-500 w-8 rounded-t-lg mb-1" style="height: 90%"></div>
+                            <span class="text-xs text-gray-600">Thu</span>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <div class="chart-bar bg-blue-500 w-8 rounded-t-lg mb-1" style="height: 75%"></div>
+                            <span class="text-xs text-gray-600">Fri</span>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <div class="chart-bar bg-blue-500 w-8 rounded-t-lg mb-1" style="height: 65%"></div>
+                            <span class="text-xs text-gray-600">Sat</span>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <div class="chart-bar bg-blue-500 w-8 rounded-t-lg mb-1" style="height: 40%"></div>
+                            <span class="text-xs text-gray-600">Sun</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4 mb-6">
+                    <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-check text-green-600"></i>
+                            </div>
+                            <div>
+                                <p class="text-gray-600 text-sm">Completed</p>
+                                <h3 class="font-bold text-xl">42</h3>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-list text-blue-600"></i>
+                            </div>
+                            <div>
+                                <p class="text-gray-600 text-sm">Total Tasks</p>
+                                <h3 class="font-bold text-xl">54</h3>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-clock text-yellow-600"></i>
+                            </div>
+                            <div>
+                                <p class="text-gray-600 text-sm">Pending</p>
+                                <h3 class="font-bold text-xl">12</h3>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-fire text-purple-600"></i>
+                            </div>
+                            <div>
+                                <p class="text-gray-600 text-sm">Current Streak</p>
+                                <h3 class="font-bold text-xl">7 days</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
+                    <h3 class="font-medium text-gray-800 mb-4">Productivity Trends</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-sm text-gray-600">Morning (6AM-12PM)</span>
+                                <span class="text-sm font-medium text-gray-800">85%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-green-500 h-2 rounded-full" style="width: 85%"></div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-sm text-gray-600">Afternoon (12PM-6PM)</span>
+                                <span class="text-sm font-medium text-gray-800">72%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-blue-500 h-2 rounded-full" style="width: 72%"></div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <div class="flex justify-between mb-1">
+                                <span class="text-sm text-gray-600">Evening (6PM-12AM)</span>
+                                <span class="text-sm font-medium text-gray-800">45%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-purple-500 h-2 rounded-full" style="width: 45%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile Screen -->
+        <div id="profile-screen" class="min-h-screen bg-white hidden">
+            <div class="p-6">
+                <div class="flex items-center mb-6">
+                    <h1 class="text-2xl font-bold text-gray-800 flex-grow">Profile</h1>
+                    <button class="text-gray-500">
+                        <i class="fas fa-ellipsis-v"></i>
+                    </button>
+                </div>
+                
+                <div class="flex flex-col items-center mb-8">
+                    <div class="w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+                        <i class="fas fa-user text-blue-500 text-3xl"></i>
+                    </div>
+                    <h2 class="text-xl font-bold text-gray-800">John Doe</h2>
+                    <p class="text-gray-600">john.doe@example.com</p>
+                </div>
+                
+                <div class="space-y-4 mb-8">
+                    <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-user-edit text-blue-600"></i>
+                            </div>
+                            <div class="flex-grow">
+                                <h3 class="font-medium text-gray-800">Edit Profile</h3>
+                            </div>
+                            <i class="fas fa-chevron-right text-gray-400"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-bell text-green-600"></i>
+                            </div>
+                            <div class="flex-grow">
+                                <h3 class="font-medium text-gray-800">Notifications</h3>
+                            </div>
+                            <i class="fas fa-chevron-right text-gray-400"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-moon text-purple-600"></i>
+                            </div>
+                            <div class="flex-grow">
+                                <h3 class="font-medium text-gray-800">Appearance</h3>
+                            </div>
+                            <i class="fas fa-chevron-right text-gray-400"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-yellow-100 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-shield-alt text-yellow-600"></i>
+                            </div>
+                            <div class="flex-grow">
+                                <h3 class="font-medium text-gray-800">Privacy & Security</h3>
+                            </div>
+                            <i class="fas fa-chevron-right text-gray-400"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center mr-3">
+                                <i class="fas fa-question-circle text-red-600"></i>
+                            </div>
+                            <div class="flex-grow">
+                                <h3 class="font-medium text-gray-800">Help & Support</h3>
+                            </div>
+                            <i class="fas fa-chevron-right text-gray-400"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <button class="w-full bg-red-500 text-white py-3 rounded-lg font-medium hover:bg-red-600 transition duration-200 flex items-center justify-center" onclick="showScreen('login-screen')">
+                    <i class="fas fa-sign-out-alt mr-2"></i> Log Out
+                </button>
+            </div>
+        </div>
+
+        <!-- Bottom Navigation -->
+        <div class="bottom-nav bg-white border-t border-gray-200 py-2 px-6 flex justify-between">
+            <button class="flex flex-col items-center text-blue-500" onclick="showScreen('home-screen')">
+                <i class="fas fa-home mb-1"></i>
+                <span class="text-xs">Home</span>
+            </button>
+            <button class="flex flex-col items-center text-gray-500" onclick="showScreen('analytics-screen')">
+                <i class="fas fa-chart-bar mb-1"></i>
+                <span class="text-xs">Analytics</span>
+            </button>
+            <button class="flex flex-col items-center text-gray-500" onclick="showScreen('add-task-screen')">
+                <div class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white -mt-6 shadow-lg">
+                    <i class="fas fa-plus"></i>
+                </div>
+            </button>
+            <button class="flex flex-col items-center text-gray-500">
+                <i class="fas fa-calendar mb-1"></i>
+                <span class="text-xs">Calendar</span>
+            </button>
+            <button class="flex flex-col items-center text-gray-500" onclick="showScreen('profile-screen')">
+                <i class="fas fa-user mb-1"></i>
+                <span class="text-xs">Profile</span>
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Set current date
+        const now = new Date();
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        document.getElementById('current-date').textContent = now.toLocaleDateString('en-US', options);
+        
+        // Show initial screen (splash)
+        function showScreen(screenId) {
+            // Hide all screens
+            document.querySelectorAll('[id$="-screen"]').forEach(screen => {
+                screen.classList.add('hidden');
+            });
+            
+            // Show the requested screen
+            document.getElementById(screenId).classList.remove('hidden');
+            
+            // Special case for splash screen - automatically go to login after delay
+            if (screenId === 'splash-screen') {
+                setTimeout(() => {
+                    showScreen('login-screen');
+                }, 3000);
+            }
+        }
+        
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            showScreen('splash-screen');
+        });
+        
+        // Toggle task completion
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('.task-item button') && !e.target.closest('.task-item button i.fa-ellipsis-v')) {
+                const button = e.target.closest('.task-item button');
+                const icon = button.querySelector('i');
+                
+                if (icon.classList.contains('fa-check')) {
+                    icon.classList.remove('fa-check');
+                    button.classList.remove('border-green-500');
+                    button.classList.add('border-blue-500');
+                    
+                    // Update status in the task
+                    const statusSpan = button.closest('.task-item').querySelector('span.bg-green-100');
+                    statusSpan.textContent = 'Pending';
+                    statusSpan.classList.remove('bg-green-100', 'text-green-800');
+                    statusSpan.classList.add('bg-blue-100', 'text-blue-800');
+                } else {
+                    icon.classList.add('fa-check');
+                    button.classList.remove('border-blue-500');
+                    button.classList.add('border-green-500');
+                    
+                    // Update status in the task
+                    const statusSpan = button.closest('.task-item').querySelector('span.bg-blue-100');
+                    statusSpan.textContent = 'Completed';
+                    statusSpan.classList.remove('bg-blue-100', 'text-blue-800');
+                    statusSpan.classList.add('bg-green-100', 'text-green-800');
+                }
+            }
+        });
+    </script>
+</body>
+</html>
